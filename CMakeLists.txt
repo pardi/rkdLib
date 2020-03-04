@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 
 # set the project name
 project(RKDLib 
-    VERSION 0.0
+    VERSION 1.0
     LANGUAGES CXX)
 
 # # specify the C++ standard
@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # compile extras options
-# add_compile_options(-Wall -Wextra -O3)
+add_compile_options(-Wall -Wextra -O3)
 
 # add the find packages for Eigen in the cmake folder
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
@@ -27,15 +27,36 @@ option(STRICT "Treat warnings as errors" OFF)
 # file to compile
 set(EXECUTABLE_FILES
   src/robot.cpp
-  src/test.cpp
+  #src/test.cpp
 )
 
+# Set variables
+set(LIB_NAME rkdRobot)
+
+# add Libraries
+add_library(${LIB_NAME} SHARED src/robot.cpp)
+
+# Headers
+set(HEADERS_RKD
+	include/RKD/robot.h
+)
 
 # add the executable
-add_executable(${PROJECT_NAME}  "${EXECUTABLE_FILES}")
+#add_executable(${LIB_NAME}  "${EXECUTABLE_FILES}")
 
 # Include Dirs
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
 # Target link libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE ${VTK_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik)
+target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik)
+
+# ------------------------------------------------------- INSTALL
+
+# Set Version properties
+set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION} 
+								PUBLIC_HEADER "${HEADERS_RKD}")
+
+# Install target
+install(TARGETS ${LIB_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION RKD/${CMAKE_INSTALL_INCLUDEDIR})

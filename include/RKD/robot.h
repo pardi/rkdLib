@@ -112,25 +112,20 @@ public:
 	bool removePayload();
 	/*! \brief Get segment positions
 	 * 
-	 *	Get pose for all Joints in the chain
+	 *	Get pose for all Joints in the chain - Eigen
 	 */
 	bool getJntPose(const Eigen::VectorXd&, std::vector< Eigen::VectorXd > &);
 	/*! \brief Get segment positions
 	 * 
-	 *	Get pose for a single Joint of the chain
+	 *	Get pose for a single Joint of the chain 
 	 */
 	Eigen::VectorXd getJntPose(const Eigen::VectorXd&, const int&);
 
 	/*! \brief Get segment positions
 	 * 
-	 *	Get position for all segments in the chain
+	 *	Get pose for all segments in the chain - KDL
 	 */
-	bool getSegmentsPos(const KDL::JntArray, std::vector< KDL::Frame > &);
-	/*! \brief Get segment and joint positions
-	 * 
-	 *	Get position for all segments and joints in the chain
-	 */	
-	bool getSegmentsAndJointsPos(const KDL::JntArray, std::vector< KDL::Frame > &);
+	bool getJntPose(const KDL::JntArray, std::vector< KDL::Frame > &);
 	/*! \brief Check if the robot is correctly loaded
 	 * 
 	 *	Check if the robot is enabled

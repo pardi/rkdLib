@@ -441,7 +441,7 @@ bool Robot::removePayload(){
 	return true;
 }
 
-bool Robot::getSegmentsPos(const KDL::JntArray q, std::vector< KDL::Frame > &segFrames){
+bool Robot::getJntPose(const KDL::JntArray q, std::vector< KDL::Frame > &segFrames){
 
 	//------------------------------------------------------
 	// Initialise IK structures
@@ -529,34 +529,6 @@ Eigen::VectorXd Robot::getJntPose(const Eigen::VectorXd& q, const int& idx){
 	return T_eigen;
 }
 
-
-
-bool Robot::getSegmentsAndJointsPos(const KDL::JntArray q, std::vector< KDL::Frame > &segFrames){
-	
-	//------------------------------------------------------
-	// Get the segments' frame for the configuratio q
-	//------------------------------------------------------
-	if (getSegmentsPos(q, segFrames)){
-		
-		//------------------------------------------------------
-		// Initialise IK structures
-		//------------------------------------------------------
-		KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
-		KDL::Frame med;
-
-		//------------------------------------------------------
-		// Add median frame between two joints
-		//------------------------------------------------------
-		for (uint i = 0; i < chain_len_ - 1; ++i){
-			med.p = (segFrames[i].p + segFrames[i+1].p) / 2;
-			segFrames.push_back(med);
-		}
-
-		return true;
-	}
-
-	return false;
-}
 
 bool Robot::good(){
 	return f_init_;
