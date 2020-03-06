@@ -4,7 +4,10 @@ using namespace RKD;
 
 Robot::Robot(){}
 
-Robot::~Robot(){}
+Robot::~Robot(){
+
+	delete tracik_solver_;
+}
 
 Robot::Robot(const Robot& robot){
 
@@ -56,6 +59,7 @@ Robot::Robot(const std::string& urdf_path, const std::string& chain_root, const 
 				joint_handles_.push_back(joint_handle);
 				// Get Joint parameters
 				urdf::JointConstSharedPtr joint =  model->getJoint(joint_handle);
+				std::cout << joint_handle << std::endl;
 				q_min_(idx) = joint->limits->lower;
 				q_max_(idx) = joint->limits->upper;
 				q_nominal_(idx) = (q_min_(idx) + q_max_(idx)) / 2.0;
