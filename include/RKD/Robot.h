@@ -1,3 +1,10 @@
+#ifndef RKDLIB_M_HEADER_COMMON
+#define RKDLIB_M_HEADER_COMMON
+
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/SVD>
 #include <Eigen/Dense>
 // #include <Quaternion.hpp>
 #include <fstream>
@@ -23,8 +30,6 @@
 // TRAC-IK Libs
 #include <trac_ik/trac_ik.hpp>
 
-#ifndef RKDLIB_M_HEADER_COMMON
-#define RKDLIB_M_HEADER_COMMON
 
 namespace RKD{
 	//!  Robot Kinematics and Dynamics Library - standalone
@@ -59,6 +64,11 @@ public:
 	 *	Get Inverse Kinematic from a given cartesian position
 	 */
 	KDL::JntArray getIK(const KDL::Frame&, const bool near=true);
+	/*! \brief Get FK
+	 * 
+	 *	Get Forward Kinematic from a given configuration
+	 */
+	Eigen::VectorXd getFK(const Eigen::VectorXd&);
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
@@ -85,6 +95,11 @@ public:
 	 *	Get Jacobian from a given configuration
 	 */
 	KDL::Jacobian getJacobian(const KDL::JntArray);
+	/*! \brief Get Jacobian of the chain
+	 * 
+	 *	Get Jacobian from a given configuration - Eigen
+	 */
+	Eigen::MatrixXd getJacobian(const Eigen::VectorXd&);
 	/*! \brief Get Inertia Matrix
 	 * 
 	 *	Get Inertia matrix from a given configuration
@@ -131,6 +146,32 @@ public:
 	 *	Check if the robot is enabled
 	 */	
 	bool good();
+	/*! \brief Get the number of joints of the robot
+	 * 
+	 *	Get the number of joints of the robot
+	 */	
+	int inline getNrOfJoints() const {
+		return chain_.getNrOfJoints();
+	}
+	/*! \brief Pseudo Inverse of a matrix
+	 * 
+	 *	Compute the Pseudo Inverse of a matrix
+	 */	
+	static Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd &M_, const bool& damped)
+	{	
+		double lambda_ = damped?0.1:0.0;
+
+		Eigen::JacobiSVD<Eigen::MatrixXd> svd(M_, Eigen::ComputeFullU | Eigen::ComputeFullV);
+		Eigen::JacobiSVD<Eigen::MatrixXd>::SingularValuesType sing_vals_ = svd.singularValues();
+		Eigen::MatrixXd S_ = M_;	// copying the dimensions of M_, its content is not needed.
+		S_.setZero();
+
+	    for (int i = 0; i < sing_vals_.size(); i++)
+	        S_(i, i) = (sing_vals_(i))/(sing_vals_(i)*sing_vals_(i) + lambda_*lambda_);
+
+	    return Eigen::MatrixXd(svd.matrixV() * S_.transpose() * svd.matrixU().transpose());
+	}
+
 private:
 	/*! \brief Get urdf model from file
 	 * 

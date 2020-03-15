@@ -30,25 +30,25 @@ option(COMPILE_EXAMPLE "Compile the test function" ON)
 
 # file to compile
 set(EXECUTABLE_FILES
-  src/robot.cpp
+  src/Robot.cpp
 )
 
 # Set variables
-set(LIB_NAME rkdRobot)
+set(LIB_NAME RKD_R)
 
 # add Libraries
-add_library(${LIB_NAME} SHARED src/robot.cpp)
-
-# Headers
-set(HEADERS_RKD
-	include/RKD/robot.h
-)
+add_library(${LIB_NAME} SHARED src/Robot.cpp)
 
 # Include Dirs
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
 # Target link libraries
 target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik)
+
+# Headers
+set(HEADERS_RKD
+  include/RKD/Robot.h
+)
 
 # ------------------------------------------------------- TEST CODE
 if (COMPILE_EXAMPLE)

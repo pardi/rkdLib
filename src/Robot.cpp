@@ -1,4 +1,4 @@
-#include <RKD/robot.h>
+#include <RKD/Robot.h>
 
 using namespace RKD;
 
@@ -322,6 +322,32 @@ KDL::Jacobian Robot::getJacobian(const KDL::JntArray q){
 	return J;
 }
 
+Eigen::MatrixXd Robot::getJacobian(const Eigen::VectorXd& q){
+
+	KDL::JntArray q_kdl(q.size());
+
+	KDL::Jacobian J(chain_len_);
+
+	//------------------------------------------------------
+	// Check status of the class
+	//------------------------------------------------------
+	if (f_init_){
+		//------------------------------------------------------
+		// Initialise structure
+		//------------------------------------------------------
+		KDL::ChainJntToJacSolver jsolver(*chainPtr_);
+
+		//------------------------------------------------------
+		// Call Joint to Jacobian function
+		//------------------------------------------------------
+		jsolver.JntToJac(q_kdl, J);
+	}
+	else
+		std::cerr << "Robot class has not initialized yet." << std::endl;
+
+	return J.data;
+}
+
 KDL::JntSpaceInertiaMatrix Robot::getInertia(const KDL::JntArray q){
 
 	KDL::JntSpaceInertiaMatrix H(chain_len_);
@@ -509,7 +535,7 @@ bool Robot::getJntPose(const Eigen::VectorXd& q, std::vector< Eigen::VectorXd > 
 Eigen::VectorXd Robot::getJntPose(const Eigen::VectorXd& q, const int& idx){
 
 	//------------------------------------------------------
-	// Initialise IK structures
+	// Initialise FK structures
 	//------------------------------------------------------
 	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
 	KDL::Frame T;
@@ -538,4 +564,32 @@ bool Robot::good(){
 	return f_init_;
 }
 
+Eigen::VectorXd Robot::getFK(const Eigen::VectorXd& q){
 
+	// Eigen::VectorXd pose;
+	
+	//------------------------------------------------------
+	// Initialise FK structures
+	//------------------------------------------------------
+	
+	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+	KDL::Frame T;
+	
+	KDL::JntArray q_kdl(chain_len_);
+	q_kdl.data = q;
+
+	//------------------------------------------------------
+	// Call Joint To Cartesian functino on the i-th joint
+	//------------------------------------------------------
+	fksolver.JntToCart(q_kdl, T);
+
+	Eigen::VectorXd T_eigen(6);
+
+	T_eigen(0) = T.p.data[0];
+	T_eigen(1) = T.p.data[1];
+	T_eigen(2) = T.p.data[2];
+	
+	T.M.GetRPY (T_eigen(3), T_eigen(4), T_eigen(5));
+
+	return T_eigen;
+}
