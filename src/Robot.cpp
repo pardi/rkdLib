@@ -59,7 +59,6 @@ Robot::Robot(const std::string& urdf_path, const std::string& chain_root, const 
 				joint_handles_.push_back(joint_handle);
 				// Get Joint parameters
 				urdf::JointConstSharedPtr joint =  model->getJoint(joint_handle);
-				std::cout << joint_handle << std::endl;
 				q_min_(idx) = joint->limits->lower;
 				q_max_(idx) = joint->limits->upper;
 				q_nominal_(idx) = (q_min_(idx) + q_max_(idx)) / 2.0;
@@ -576,11 +575,13 @@ Eigen::VectorXd Robot::getFK(const Eigen::VectorXd& q){
 	KDL::Frame T;
 	
 	KDL::JntArray q_kdl(chain_len_);
-	q_kdl.data = q;
-
+	
+	for (int i = 0; i < q.size(); ++i)
+		q_kdl.data(i) = q(i);
 	//------------------------------------------------------
 	// Call Joint To Cartesian functino on the i-th joint
 	//------------------------------------------------------
+	
 	fksolver.JntToCart(q_kdl, T);
 
 	Eigen::VectorXd T_eigen(6);

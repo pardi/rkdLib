@@ -40,10 +40,10 @@ set(LIB_NAME RKD_R)
 add_library(${LIB_NAME} SHARED src/Robot.cpp)
 
 # Include Dirs
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} /opt/ros/kinetic/include/)
 
 # Target link libraries
-target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik)
+target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser /opt/ros/kinetic/lib/libtrac_ik.so )
 
 # Headers
 set(HEADERS_RKD
@@ -56,10 +56,10 @@ if (COMPILE_EXAMPLE)
   add_executable(test_script MACOSX_BUNDLE src/test.cpp)
 
   # Include Dirs
-  target_include_directories(test_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+  target_include_directories(test_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} /opt/ros/kinetic/include/)
 
   # Target link libraries
-  target_link_libraries(test_script PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik ${LIB_NAME})
+  target_link_libraries(test_script PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser /opt/ros/kinetic/lib/libtrac_ik.so ${LIB_NAME})
 endif()
 # ------------------------------------------------------- end TEST CODE
 
