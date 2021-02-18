@@ -325,6 +325,9 @@ Eigen::MatrixXd Robot::getJacobian(const Eigen::VectorXd& q){
 
 	KDL::JntArray q_kdl(q.size());
 
+	for (int i = 0; i< q.size(); ++i)
+		q_kdl.data(i) = q(i);
+
 	KDL::Jacobian J(chain_len_);
 
 	//------------------------------------------------------
@@ -590,7 +593,7 @@ Eigen::VectorXd Robot::getFK(const Eigen::VectorXd& q){
 	T_eigen(1) = T.p.data[1];
 	T_eigen(2) = T.p.data[2];
 	
-	T.M.GetRPY (T_eigen(3), T_eigen(4), T_eigen(5));
+	T.M.GetEulerZYX (T_eigen(3), T_eigen(4), T_eigen(5));
 
 	return T_eigen;
 }

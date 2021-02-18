@@ -89,7 +89,6 @@ public:
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
 	 */
 	Eigen::VectorXd getTRAC_IK(const Eigen::Vector3d&, const Eigen::Quaterniond&, int&, const Eigen::VectorXd&);
-
 	/*! \brief Get Jacobian of the chain
 	 * 
 	 *	Get Jacobian from a given configuration
@@ -157,7 +156,7 @@ public:
 	 * 
 	 *	Compute the Pseudo Inverse of a matrix
 	 */	
-	static Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd &M_, const bool& damped)
+	static Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd M_, const bool& damped)
 	{	
 		double lambda_ = damped?0.1:0.0;
 

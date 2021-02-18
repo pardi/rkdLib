@@ -20,9 +20,8 @@ add_compile_options(-Wall -Wextra -O3)
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 
 # find packages
-find_package(Boost COMPONENTS thread REQUIRED)
+find_package(Boost REQUIRED COMPONENTS date_time filesystem iostreams)
 find_package(Eigen3 REQUIRED)
-find_package(trac_ik_lib REQUIRED)
 
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
@@ -40,10 +39,10 @@ set(LIB_NAME RKD_R)
 add_library(${LIB_NAME} SHARED src/Robot.cpp)
 
 # Include Dirs
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} /opt/ros/kinetic/include/)
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
 
 # Target link libraries
-target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser /opt/ros/kinetic/lib/libtrac_ik.so )
+target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik pthread )
 
 # Headers
 set(HEADERS_RKD
@@ -56,10 +55,10 @@ if (COMPILE_EXAMPLE)
   add_executable(test_script MACOSX_BUNDLE src/test.cpp)
 
   # Include Dirs
-  target_include_directories(test_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} /opt/ros/kinetic/include/)
+  target_include_directories(test_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
 
   # Target link libraries
-  target_link_libraries(test_script PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser /opt/ros/kinetic/lib/libtrac_ik.so ${LIB_NAME})
+  target_link_libraries(test_script PRIVATE Boost::date_time Boost::filesystem Boost::iostreams urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik ${LIB_NAME} pthread)
 endif()
 # ------------------------------------------------------- end TEST CODE
 
