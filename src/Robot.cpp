@@ -350,6 +350,42 @@ Eigen::MatrixXd Robot::getJacobian(const Eigen::VectorXd& q){
 	return J.data;
 }
 
+std::vector<double> Robot::getJacobianSTD(const Eigen::VectorXd& q){
+
+	KDL::JntArray q_kdl(q.size());
+
+	for (int i = 0; i< q.size(); ++i)
+		q_kdl.data(i) = q(i);
+
+	KDL::Jacobian J(chain_len_);
+
+	//------------------------------------------------------
+	// Check status of the class
+	//------------------------------------------------------
+	if (f_init_){
+		//------------------------------------------------------
+		// Initialise structure
+		//------------------------------------------------------
+		KDL::ChainJntToJacSolver jsolver(*chainPtr_);
+
+		//------------------------------------------------------
+		// Call Joint to Jacobian function
+		//------------------------------------------------------
+		jsolver.JntToJac(q_kdl, J);
+	}
+	else
+		std::cerr << "Robot class has not initialized yet." << std::endl;
+
+
+	std::vector<double> J_std;
+
+	for (uint i = 0; i < chain_len_; ++i)
+		for (uint j = 0; j < 6; ++j)
+			J_std.push_back(J.data(j, i));
+
+	return J_std;
+}
+
 KDL::JntSpaceInertiaMatrix Robot::getInertia(const KDL::JntArray q){
 
 	KDL::JntSpaceInertiaMatrix H(chain_len_);
@@ -596,4 +632,44 @@ Eigen::VectorXd Robot::getFK(const Eigen::VectorXd& q){
 	T.M.GetEulerZYX (T_eigen(3), T_eigen(4), T_eigen(5));
 
 	return T_eigen;
+}
+
+std::array<double, 6> Robot::getFKSTD(const Eigen::VectorXd& q){
+
+	//------------------------------------------------------
+	// Initialise FK structures
+	//------------------------------------------------------
+	
+	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+	KDL::Frame T;
+	
+	KDL::JntArray q_kdl(chain_len_);
+	
+	for (int i = 0; i < q.size(); ++i)
+		q_kdl.data(i) = q(i);
+	//------------------------------------------------------
+	// Call Joint To Cartesian functino on the i-th joint
+	//------------------------------------------------------
+	
+	fksolver.JntToCart(q_kdl, T);
+
+	Eigen::VectorXd T_eigen(6);
+
+	T_eigen(0) = T.p.data[0];
+	T_eigen(1) = T.p.data[1];
+	T_eigen(2) = T.p.data[2];
+	
+	T.M.GetEulerZYX (T_eigen(3), T_eigen(4), T_eigen(5));
+
+	std::array<double, 6> T_array;
+
+	T_array[0] = T_eigen(0);
+	T_array[1] = T_eigen(1);
+	T_array[2] = T_eigen(2);
+	T_array[3] = T_eigen(3);
+	T_array[4] = T_eigen(4);
+	T_array[5] = T_eigen(5);
+
+
+	return T_array;
 }

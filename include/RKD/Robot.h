@@ -69,6 +69,7 @@ public:
 	 *	Get Forward Kinematic from a given configuration
 	 */
 	Eigen::VectorXd getFK(const Eigen::VectorXd&);
+	std::array<double, 6> getFKSTD(const Eigen::VectorXd&);
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
@@ -99,6 +100,7 @@ public:
 	 *	Get Jacobian from a given configuration - Eigen
 	 */
 	Eigen::MatrixXd getJacobian(const Eigen::VectorXd&);
+	std::vector<double> getJacobianSTD(const Eigen::VectorXd&);
 	/*! \brief Get Inertia Matrix
 	 * 
 	 *	Get Inertia matrix from a given configuration
