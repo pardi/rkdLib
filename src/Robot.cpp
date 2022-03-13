@@ -648,7 +648,7 @@ std::array<double, 6> Robot::getFKSTD(const Eigen::VectorXd& q){
 	for (int i = 0; i < q.size(); ++i)
 		q_kdl.data(i) = q(i);
 	//------------------------------------------------------
-	// Call Joint To Cartesian functino on the i-th joint
+	// Call Joint To Cartesian function on the i-th joint
 	//------------------------------------------------------
 	
 	fksolver.JntToCart(q_kdl, T);

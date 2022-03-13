@@ -50,15 +50,22 @@ set(HEADERS_RKD
 )
 
 # ------------------------------------------------------- TEST CODE
-if (COMPILE_EXAMPLE)
+option(BUILD_EXAMPLES "Set ON to compile the examples" OFF)
+
+# Examples
+set(EXAMPLES_CPP
+    examples/example_init_class.cpp
+)
+
+if (BUILD_EXAMPLES)
   # add the executable
-  add_executable(test_script MACOSX_BUNDLE src/test.cpp)
+  add_executable(example_script MACOSX_BUNDLE ${EXAMPLES_CPP} )
 
   # Include Dirs
-  target_include_directories(test_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
+  target_include_directories(example_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
 
   # Target link libraries
-  target_link_libraries(test_script PRIVATE Boost::date_time Boost::filesystem Boost::iostreams urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik ${LIB_NAME} pthread)
+  target_link_libraries(example_script PRIVATE Boost::date_time Boost::filesystem Boost::iostreams urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik ${LIB_NAME} pthread)
 endif()
 # ------------------------------------------------------- end TEST CODE
 
