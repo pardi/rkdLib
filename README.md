@@ -1,5 +1,4 @@
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 # RKDLib
 RKDLib is a wrapper of the KDL library from Orocos, which uses Eigen and simplify the obtaining of kinematics and dynamics properties for any robot by URDF.
 
@@ -11,7 +10,7 @@ the order.
 - cmake >= 3.4
 - [kdl-orocos](https://www.orocos.org/kdl)
 - [urdfdom](https://github.com/ros/urdfdom)
-- [kdl_parser](https://github.com/ros/kdl_parser/tree/melodic-devel/kdl_parser)
+- [kdl_parser](https://github.com/ros/kdl_parser/tree/melodic-devel)
 - [trac-ik](https://bitbucket.org/traclabs/trac_ik/src/master/trac_ik_lib/)
 
 ## Installation
