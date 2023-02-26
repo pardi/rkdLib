@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+![build](https://github.com/pardi/rkdLib/actions/workflows/docker-image.yml/badge.svg?event=push)
 # RKDLib
 RKDLib is a wrapper of the KDL library from Orocos, which uses Eigen and simplify the obtaining of kinematics and dynamics properties for any robot by URDF.
 
