@@ -38,11 +38,18 @@ set(LIB_NAME RKD_R)
 # add Libraries
 add_library(${LIB_NAME} SHARED src/Robot.cpp)
 
+set(DEPENDENCY_DIR
+/opt/ros/noetic/include/ 
+/opt/ros/noetic/include/nlopt/)
+
+set(DEPENDENCY_LIB
+/opt/ros/noetic/lib/)
+
 # Include Dirs
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${DEPENDENCY_DIR})
 
 # Target link libraries
-target_link_libraries(${LIB_NAME} PRIVATE ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik pthread )
+target_link_libraries(${LIB_NAME} PRIVATE -L${DEPENDENCY_LIB} ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik pthread)
 
 # Headers
 set(HEADERS_RKD
