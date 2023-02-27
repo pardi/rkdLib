@@ -56,6 +56,26 @@ set(HEADERS_RKD
   include/RKD/Robot.h
 )
 
+# Tests
+add_subdirectory(dep/gtest)
+enable_testing()
+
+add_executable(
+  test_robot
+  tests/test_robot.cpp
+  )
+
+target_link_libraries(
+  test_robot
+  GTest::gtest_main
+  Eigen3::Eigen3 
+  RKD_R
+)
+
+include(GoogleTest)
+gtest_discover_tests(test_robot)
+
+
 # ------------------------------------------------------- TEST CODE
 option(BUILD_EXAMPLES "Set ON to compile the examples" OFF)
 
