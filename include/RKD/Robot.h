@@ -7,9 +7,11 @@
 #include <Eigen/SVD>
 #include <Eigen/Dense>
 // #include <Quaternion.hpp>
-#include <fstream>
+
 // General Libs
 #include <iostream>
+#include <memory>
+#include <fstream>
 // URDF
 #include <urdf_model/model.h>
 #include <urdf_parser/urdf_parser.h>
@@ -197,7 +199,7 @@ private:
 	std::vector<std::string> joint_handles_;
 	bool f_init_{false};
 	bool f_chainPL_{false};
-	TRAC_IK::TRAC_IK* tracik_solver_;
+	std::unique_ptr<TRAC_IK::TRAC_IK> tracik_solver_;
 
 };
 }

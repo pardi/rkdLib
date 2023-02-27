@@ -4,10 +4,7 @@ using namespace RKD;
 
 Robot::Robot(){}
 
-Robot::~Robot(){
-
-	delete tracik_solver_;
-}
+Robot::~Robot(){}
 
 Robot::Robot(const Robot& robot){
 
@@ -70,7 +67,7 @@ Robot::Robot(const std::string& urdf_path, const std::string& chain_root, const 
 			//------------------------------------------------------
 			// Initialise TRAC-IK
 			//------------------------------------------------------
-	 		tracik_solver_ = new TRAC_IK::TRAC_IK(chain_, q_min_, q_max_);
+	 		tracik_solver_.reset(new TRAC_IK::TRAC_IK(chain_, q_min_, q_max_));
 			if (!tracik_solver_->getKDLChain(chain_)){
 				std::cout << "TRAC_IK ERROR" << std::endl;
 				f_init_ = false;
