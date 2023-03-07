@@ -77,7 +77,6 @@ public:
 	 *	Get Forward Kinematic from a given configuration
 	 */
 	Eigen::VectorXd getFK(const Eigen::VectorXd&);
-	std::array<double, 6> getFKSTD(const Eigen::VectorXd&);
 	std::vector<double> getFK_std(std::vector<double> const&);
 	/*! \brief Get IK fast
 	 * 
