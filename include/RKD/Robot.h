@@ -146,6 +146,7 @@ public:
 	 *	Get pose for a single Joint of the chain 
 	 */
 	Eigen::VectorXd getJntPose(const Eigen::VectorXd&, const int&);
+	std::vector<double> getJntPose_std(std::vector<double> const&, int idx = 0);
 
 	/*! \brief Get segment positions
 	 * 

@@ -371,7 +371,7 @@ std::vector<double> Robot::getJacobian_std(std::vector<double> const& q){
 	}
 	else
 		std::cerr << "Robot class has not initialized yet." << std::endl;
-		// TODO: does this raises an error?
+		// TODO: does this raise an error?
 
 	for (uint i = 0; i < chain_len_; ++i)
 		for (uint j = 0; j < SIZE_POSE; ++j)
@@ -625,6 +625,42 @@ Eigen::VectorXd Robot::getJntPose(const Eigen::VectorXd& q, const int& idx){
 	T.M.GetRPY (T_eigen(3), T_eigen(4), T_eigen(5));
 
 	return T_eigen;
+}
+
+std::vector<double> Robot::getJntPose_std(std::vector<double> const& q, int idx){
+
+	std::vector<double> T_std;
+
+	if(f_init_){
+
+		//------------------------------------------------------
+		// Initialise FK structures
+		//------------------------------------------------------
+		KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+		KDL::Frame T;
+		
+		KDL::JntArray q_kdl(chain_len_);
+		
+		for (int i = q.size(); i--;){
+			q_kdl.data(i) = q[i];
+		}
+
+		//------------------------------------------------------
+		// Call Joint To Cartesian functino on the i-th joint
+		//------------------------------------------------------
+		fksolver.JntToCart(q_kdl, T, idx);
+
+		T_std[0] = T.p.data[0];
+		T_std[1] = T.p.data[1];
+		T_std[2] = T.p.data[2];
+		
+		T.M.GetRPY (T_std[3], T_std[4], T_std[5]);
+	}
+	else{
+		std::cerr << "Robot class has not been initialized yet." << std::endl;
+	}
+
+	return T_std;
 }
 
 
