@@ -40,6 +40,12 @@
 
 
 namespace RKD{
+
+enum Parameterisation{
+	RPY = 0,
+	QUATERNION = 1,
+	ZYZ = 2};
+
 	//!  Robot Kinematics and Dynamics Library - standalone
 	/*!
 	  This class provides the user with information about kinematics and dynamics of a robot chain
@@ -71,13 +77,13 @@ public:
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position
 	 */
-	KDL::JntArray getIK(const KDL::Frame&, const bool near=true);
+	std::vector<double> getIK(std::vector<double> const&, bool const near=true);
+
 	/*! \brief Get FK
 	 * 
 	 *	Get Forward Kinematic from a given configuration
 	 */
-	Eigen::VectorXd getFK(const Eigen::VectorXd&);
-	std::vector<double> getFK_std(std::vector<double> const&);
+	std::vector<double> getFK(std::vector<double> const&);
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
@@ -145,8 +151,7 @@ public:
 	 * 
 	 *	Get pose for a single Joint of the chain 
 	 */
-	Eigen::VectorXd getJntPose(const Eigen::VectorXd&, const int&);
-	std::vector<double> getJntPose_std(std::vector<double> const&, int idx = 0);
+	std::vector<double> getJntPose(std::vector<double> const&, int idx = 0);
 
 	/*! \brief Get segment positions
 	 * 
@@ -195,6 +200,11 @@ private:
 	 *	Generate a KDL chain and tree from an URDF file
 	 */	
 	bool loadRobot(urdf::ModelInterfaceSharedPtr, const std::string&, const std::string&);
+	/*! \brief Convert a pose into a KDL::Frame
+	 * 
+	 *	Generate a KDL frame given a pose expressed as std::vector<double>
+	 */	
+	KDL::Frame PoseToFrame(std::vector<double> const& pose, Parameterisation const param = RPY);
 
 
 	KDL::Chain chain_;
