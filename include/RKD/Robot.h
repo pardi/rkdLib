@@ -1,6 +1,8 @@
 #ifndef RKDLIB_M_HEADER_COMMON
 #define RKDLIB_M_HEADER_COMMON
 
+#define SIZE_POSE 6
+
 // Eigen
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -12,6 +14,8 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <vector>
+
 // URDF
 #include <urdf_model/model.h>
 #include <urdf_parser/urdf_parser.h>
@@ -31,6 +35,8 @@
 #include <kdl/tree.hpp>
 // TRAC-IK Libs
 #include <trac_ik/trac_ik.hpp>
+
+
 
 
 namespace RKD{
@@ -72,6 +78,7 @@ public:
 	 */
 	Eigen::VectorXd getFK(const Eigen::VectorXd&);
 	std::array<double, 6> getFKSTD(const Eigen::VectorXd&);
+	std::vector<double> getFK_std(std::vector<double> const&);
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik

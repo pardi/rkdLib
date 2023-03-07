@@ -213,9 +213,6 @@ KDL::JntArray Robot::getTRAC_IK(const KDL::Frame& end_effector_pose, int& rc, co
     return q_result;
 }
 
-
-
-
 KDL::JntArray Robot::getTRAC_IK(const KDL::Frame& end_effector_pose, int& rc, const KDL::JntArray& q_init){
   
 	KDL::JntArray q_result(chain_len_);
@@ -629,6 +626,37 @@ Eigen::VectorXd Robot::getFK(const Eigen::VectorXd& q){
 	T.M.GetEulerZYX (T_eigen(3), T_eigen(4), T_eigen(5));
 
 	return T_eigen;
+}
+
+std::vector<double> Robot::getFK_std(std::vector<double> const& q){
+	//------------------------------------------------------
+	// Initialise FK structures
+	//------------------------------------------------------
+	
+	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+	KDL::Frame T;
+	
+	KDL::JntArray q_kdl(chain_len_);
+
+	for (int i = q.size(); i--;){
+		q_kdl.data(i) = q[i];
+	}
+
+	//------------------------------------------------------
+	// Call Joint To Cartesian function
+	//------------------------------------------------------
+	
+	fksolver.JntToCart(q_kdl, T);
+
+	std::vector<double> T_std(SIZE_POSE);
+
+	T_std[0] = T.p.data[0];
+	T_std[1] = T.p.data[1];
+	T_std[2] = T.p.data[2];
+	
+	T.M.GetEulerZYX (T_std[3], T_std[4], T_std[5]);
+
+	return T_std;
 }
 
 std::array<double, 6> Robot::getFKSTD(const Eigen::VectorXd& q){
