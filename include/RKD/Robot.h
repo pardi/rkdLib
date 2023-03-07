@@ -109,6 +109,8 @@ public:
 	 */
 	Eigen::MatrixXd getJacobian(const Eigen::VectorXd&);
 	std::vector<double> getJacobianSTD(const Eigen::VectorXd&);
+	std::vector<double> getJacobian_std(std::vector<double> const&);
+
 	/*! \brief Get Inertia Matrix
 	 * 
 	 *	Get Inertia matrix from a given configuration
