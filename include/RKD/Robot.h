@@ -3,6 +3,7 @@
 
 #define SIZE_POSE 6
 #define IK_TIMEOUT 0.005
+#define STANDARD_GRAVITY_VEC {0.0, 0.0, -9.81}
 
 // Eigen
 #include <Eigen/Core>
@@ -102,13 +103,7 @@ public:
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
 	 */
 	std::vector<double> getTRAC_IK(std::vector<double> const&, int&, std::vector<double> const&, Parameterisation const param=RPY);
-
-	/*! \brief Get IK fast - EIGEN
-	 * 
-	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
-	 */
-	Eigen::VectorXd getTRAC_IK(const Eigen::Vector3d&, const Eigen::Quaterniond&, int&, const Eigen::VectorXd&);
-
+	
 	/*! \brief Get Jacobian of the chain
 	 * 
 	 *	Get Jacobian from a given configuration
@@ -119,32 +114,38 @@ public:
 	 * 
 	 *	Get Inertia matrix from a given configuration
 	 */
-	KDL::JntSpaceInertiaMatrix getInertia(const KDL::JntArray);
+	std::vector<double> getInertia(std::vector<double> const&, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+	
 	/*! \brief Get Coriolis Matrix
 	 * 
 	 *	Get Coriolis Matrix given a joint configuration and joint velocities
 	 */		
-	KDL::JntArray getCoriolis(const KDL::JntArray, const KDL::JntArray);
+	std::vector<double> getCoriolis(std::vector<double> const&, std::vector<double> const&, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+	
 	/*! \brief Get Gravity vector
 	 * 
 	 *	Get Gravity vector from a given configuration
 	 */
-	KDL::JntArray getGravity(const KDL::JntArray);
+	std::vector<double> getGravity(std::vector<double> const& q, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+
 	/*! \brief Load payload
 	 * 
 	 *	Add a payload to the existing robot chain
 	 */
 	bool addPayload(const KDL::Frame &f_tip=KDL::Frame::Identity(), const KDL::RigidBodyInertia &I=KDL::RigidBodyInertia::Zero());
+	
 	/*! \brief UnLoad payload
 	 * 
 	 *	Remove a payload to the existing robot chain
 	 */
 	bool removePayload();
+	
 	/*! \brief Get segment positions
 	 * 
 	 *	Get pose for all Joints in the chain - Eigen
 	 */
 	bool getJntPose(const Eigen::VectorXd&, std::vector< Eigen::VectorXd > &);
+	
 	/*! \brief Get segment positions
 	 * 
 	 *	Get pose for a single Joint of the chain 
@@ -156,18 +157,66 @@ public:
 	 *	Get pose for all segments in the chain - KDL
 	 */
 	bool getJntPose(const KDL::JntArray, std::vector< KDL::Frame > &);
+	
 	/*! \brief Check if the robot is correctly loaded
 	 * 
 	 *	Check if the robot is enabled
 	 */	
 	bool good();
+	
 	/*! \brief Get the number of joints of the robot
 	 * 
 	 *	Get the number of joints of the robot
 	 */	
-	int inline getNrOfJoints() const {
+	
+	uint inline getNrOfJoints() const {
 		return chain_.getNrOfJoints();
 	}
+	
+private:
+	
+	/*! \brief Get urdf model from file
+	 * 
+	 *	Read and create a URDF::Model from file
+	 */	
+	urdf::ModelInterfaceSharedPtr getURDFModel(const std::string&);
+	
+	/*! \brief Load the Robot from URDF
+	 * 
+	 *	Generate a KDL chain and tree from an URDF file
+	 */	
+	bool loadRobot(urdf::ModelInterfaceSharedPtr, const std::string&, const std::string&);
+	
+	/*! \brief Convert a pose into a KDL::Frame
+	 * 
+	 *	Generate a KDL frame given a pose expressed as std::vector<double>
+	 */	
+	KDL::Frame PoseToFrame(std::vector<double> const& pose, Parameterisation const param = RPY);
+	
+	/*! \brief Convert a Inertia Matrix into a vector<double>
+	 * 
+	 *	Serialise the matrix of inertia into a std::vector<double> by column
+	 */	
+	std::vector<double> matrixSerialisation(KDL::JntSpaceInertiaMatrix const&);
+	
+	/*! \brief Convert a Jacobian Matrix into a vector<double>
+	 * 
+	 *	Serialise the jacobian matrix into a std::vector<double> by column
+	 */	
+	std::vector<double> matrixSerialisation(KDL::Jacobian const&);
+	
+	/*! \brief Convert a JntArray into a vector<double>
+	 * 
+	 *	Serialise the vector of jnt array into a std::vector<double>
+	 */	
+	std::vector<double> vectorSerialisation(KDL::JntArray const&);
+
+	/*! \brief Convert a vector<double> into JntArray
+	 * 
+	 *	Deserialise the vecot of std::vector<double> into a jnt array
+	 */	
+	KDL::JntArray vectorDeserialisation(std::vector<double> const&);
+
 	/*! \brief Pseudo Inverse of a matrix
 	 * 
 	 *	Compute the Pseudo Inverse of a matrix
@@ -186,24 +235,6 @@ public:
 
 	    return Eigen::MatrixXd(svd.matrixV() * S_.transpose() * svd.matrixU().transpose());
 	}
-
-private:
-	/*! \brief Get urdf model from file
-	 * 
-	 *	Read and create a URDF::Model from file
-	 */	
-	urdf::ModelInterfaceSharedPtr getURDFModel(const std::string&);
-	/*! \brief Load the Robot from URDF
-	 * 
-	 *	Generate a KDL chain and tree from an URDF file
-	 */	
-	bool loadRobot(urdf::ModelInterfaceSharedPtr, const std::string&, const std::string&);
-	/*! \brief Convert a pose into a KDL::Frame
-	 * 
-	 *	Generate a KDL frame given a pose expressed as std::vector<double>
-	 */	
-	KDL::Frame PoseToFrame(std::vector<double> const& pose, Parameterisation const param = RPY);
-
 
 	KDL::Chain chain_;
 	KDL::Chain chainPL_;

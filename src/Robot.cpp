@@ -135,15 +135,13 @@ bool Robot::loadRobot(urdf::ModelInterfaceSharedPtr model, const std::string& ch
 
 std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, bool const near, Parameterisation const param){
 
-	std::vector<double> q_res(chain_len_);
-
+	KDL::JntArray q(chain_len_);
+	
 	//------------------------------------------------------
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
 
-		KDL::JntArray q(chain_len_);
-		
 		//------------------------------------------------------
 		// Initialise the structure of IK algorithm
 		//------------------------------------------------------
@@ -178,53 +176,24 @@ std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, b
 		//------------------------------------------------------
 		last_q_ = q;
 
-		// Move to result
-		for (uint idx = chain_len_; idx--;){
-			q_res[idx] = q.data[idx];
-		}
 	}
 	else{
 		std::cerr<< "Robot class has not initialized yet." << std::endl;
 	}
 
-	return q_res;
+	return vectorSerialisation(q);
 }
 
-
-KDL::Frame Robot::PoseToFrame(std::vector<double> const& pose, Parameterisation const param){
-
-	KDL::Frame res;
-	
-	// Position
-	res.p[0] = pose[0];
-	res.p[1] = pose[1];
-	res.p[2] = pose[2];
-
-	switch(param){
-		case QUATERNION: {KDL::Rotation::Quaternion(pose[3], pose[4], pose[5], pose[6]); } break;
-		case RPY: {KDL::Rotation::RPY(pose[3], pose[4], pose[5]); } break;
-		default:
-			std::cerr << "Parameterisation: " << param << " not recognised"<< std::endl;
-	}
-
-	return res;
-}
 
 std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_pose, int& rc, bool near, Parameterisation const param){
 		
 	std::vector<double> q_init(chain_len_);
 
 	if (near && last_q_.rows() != 0){
-			// Move to result
-			for (uint idx = chain_len_; idx--;){
-				q_init[idx] = last_q_.data[idx];
-			}
+			q_init = vectorSerialisation(last_q_);
 		}
 		else{
-			// Move to result
-			for (uint idx = chain_len_; idx--;){
-				q_init[idx] = q_nominal_.data[idx];
-			}
+			q_init = vectorSerialisation(q_nominal_);
 		}
 
 	return getTRAC_IK(end_effector_pose, rc, q_init, param);
@@ -233,7 +202,7 @@ std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_po
 
 std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_pose, int& rc, std::vector<double> const& q_init, Parameterisation const param){
   
-	std::vector<double> q_res(chain_len_);
+	KDL::JntArray q(chain_len_);
 
     double elapsed = 0.0;
     const double timeout = IK_TIMEOUT;
@@ -245,14 +214,12 @@ std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_po
 	//------------------------------------------------------
 	if (f_init_){
 
-		KDL::JntArray q(chain_len_);
+		
 		KDL::JntArray q_initKDL(chain_len_);
 		KDL::Frame ee_frame = PoseToFrame(end_effector_pose, param);
 
 		// Copy q_init
-		for (uint idx = chain_len_; idx--;){
-			q_initKDL.data[idx] = q_init[idx];
-		}
+		q_initKDL = vectorDeserialisation(q_init);
 
 		start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -270,28 +237,15 @@ std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_po
 		//------------------------------------------------------
 	    last_q_ = q;
 
-		//------------------------------------------------------
-		// Copy to result the final configuration
-		//------------------------------------------------------
-		for (uint idx = chain_len_; idx--;){
-			q_res[idx] = q.data[idx];
-		}
 	}else{
 		std::cout << "Robot not initialised!" << std::endl;
 	}
 		
-    return q_res;
+    return vectorSerialisation(q);
 
 }
 
 std::vector<double> Robot::getJacobian(std::vector<double> const& q){
-
-	std::vector<double> J_res;
-
-	KDL::JntArray q_kdl(q.size());
-
-	for (uint i = 0; i < q.size(); ++i)
-		q_kdl.data(i) = q[i];
 
 	KDL::Jacobian J(chain_len_);
 
@@ -299,6 +253,8 @@ std::vector<double> Robot::getJacobian(std::vector<double> const& q){
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
+
 		//------------------------------------------------------
 		// Initialise structure
 		//------------------------------------------------------
@@ -314,38 +270,37 @@ std::vector<double> Robot::getJacobian(std::vector<double> const& q){
 		// TODO: does this raise an error?	
 	}
 
-	for (uint i = 0; i < chain_len_; ++i)
-		for (uint j = 0; j < SIZE_POSE; ++j)
-			J_res.push_back(J.data(j, i));
-
-	return J_res;	
+	return matrixSerialisation(J);	
 }
 
-KDL::JntSpaceInertiaMatrix Robot::getInertia(const KDL::JntArray q){
+std::vector<double> Robot::getInertia(std::vector<double> const& q, std::vector<double> const& gravity_vec){
 
-	KDL::JntSpaceInertiaMatrix H(chain_len_);
+	KDL::JntSpaceInertiaMatrix M(chain_len_);
 
 	//------------------------------------------------------
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
+		
 		//------------------------------------------------------
 		// Initialise structure
 		//------------------------------------------------------
-		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(0, 0, -9.81));
+		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(gravity_vec[0], gravity_vec[1], gravity_vec[2]));
 
 		//------------------------------------------------------
 		// Call Joint to Inertia matrix function
 		//------------------------------------------------------
-		DChain.JntToMass(q, H);
+		DChain.JntToMass(q_kdl, M);
 	}
-	else
+	else{
 		std::cerr << "Robot class has not initialized yet." << std::endl;
+	}
 
-	return H;
+	return matrixSerialisation(M);
 }
 
-KDL::JntArray Robot::getCoriolis(const KDL::JntArray q, const KDL::JntArray dq){
+std::vector<double> Robot::getCoriolis(std::vector<double> const& q, std::vector<double> const& dq, std::vector<double> const& gravity_vec){
 
 	KDL::JntArray C(chain_len_);
 
@@ -353,22 +308,28 @@ KDL::JntArray Robot::getCoriolis(const KDL::JntArray q, const KDL::JntArray dq){
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
+
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
+		KDL::JntArray dq_kdl = vectorDeserialisation(dq);
+
 		//------------------------------------------------------
 		// Initialise structure
 		//------------------------------------------------------
-		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(0,0,-9.81));
+		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(gravity_vec[0], gravity_vec[1], gravity_vec[2]));
+		
 		//------------------------------------------------------
 		// Call Joint to Coriolis matrix function
 		//------------------------------------------------------
-		DChain.JntToCoriolis(q, dq, C);
+		DChain.JntToCoriolis(q_kdl, dq_kdl, C);
 	}
-	else
+	else{
 		std::cerr << "Robot class has not initialized yet." << std::endl;
+	}
 
-	return C;
+	return vectorSerialisation(C);
 }
 
-KDL::JntArray Robot::getGravity(const KDL::JntArray q){
+std::vector<double> Robot::getGravity(std::vector<double> const& q, std::vector<double> const& gravity_vec){
 
 	KDL::JntArray G(chain_len_);
 
@@ -379,16 +340,17 @@ KDL::JntArray Robot::getGravity(const KDL::JntArray q){
 		//------------------------------------------------------
 		// Initialise structure
 		//------------------------------------------------------
-		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(0, 0, -9.81));
+		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(gravity_vec[0], gravity_vec[1], gravity_vec[2]));
 		//------------------------------------------------------
 		// Call Joint to Gravity vector function
 		//------------------------------------------------------
-		DChain.JntToGravity(q, G);
+		DChain.JntToGravity(vectorDeserialisation(q), G);
 	}
-	else
+	else{
 		std::cerr << "Robot class has not initialized yet." << std::endl;
+	}
 
-	return G;
+	return vectorSerialisation(G);
 }
 
 bool Robot::addPayload(const KDL::Frame &f_tip, const KDL::RigidBodyInertia &I){
@@ -518,12 +480,8 @@ std::vector<double> Robot::getJntPose(std::vector<double> const& q, int idx){
 		KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
 		KDL::Frame T;
 		
-		KDL::JntArray q_kdl(chain_len_);
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
 		
-		for (int i = q.size(); i--;){
-			q_kdl.data(i) = q[i];
-		}
-
 		//------------------------------------------------------
 		// Call Joint To Cartesian functino on the i-th joint
 		//------------------------------------------------------
@@ -550,4 +508,71 @@ std::vector<double> Robot::getFK(std::vector<double> const& q){
 
 	return getJntPose(q, chain_len_);
 	
+}
+
+std::vector<double> Robot::vectorSerialisation(KDL::JntArray const& v){
+
+	std::vector<double> v_res(v.data.size());
+
+	for (uint idx = v.data.size(); idx--;){
+		v_res[idx] = v.data(idx);
+	}
+
+	return v_res;
+}
+
+KDL::JntArray Robot::vectorDeserialisation(std::vector<double> const& v){
+
+	KDL::JntArray v_res(v.size());
+	
+	for (uint idx = v.size(); idx--;){
+		v_res.data(idx) = v[idx];
+	}
+
+	return v_res;
+}
+
+std::vector<double> Robot::matrixSerialisation(KDL::JntSpaceInertiaMatrix const& M){
+
+	std::vector<double> M_res(chain_len_ * SIZE_POSE);
+
+	for (uint i = 0; i < M.data.cols() ; ++i){
+		for (uint j = 0; j < M.data.rows(); ++j){
+			M_res[i * chain_len_ + j] = M(i, j);
+		}
+	}
+
+	return M_res;
+}
+
+std::vector<double> Robot::matrixSerialisation(KDL::Jacobian const& M){
+
+	std::vector<double> M_res(chain_len_ * SIZE_POSE);
+
+	for (uint i = 0; i < M.data.cols() ; ++i){
+		for (uint j = 0; j < M.data.rows(); ++j){
+			M_res[i * chain_len_ + j] = M(i, j);
+		}
+	}
+
+	return M_res;
+}
+
+KDL::Frame Robot::PoseToFrame(std::vector<double> const& pose, Parameterisation const param){
+
+	KDL::Frame res;
+	
+	// Position
+	res.p[0] = pose[0];
+	res.p[1] = pose[1];
+	res.p[2] = pose[2];
+
+	switch(param){
+		case QUATERNION: {KDL::Rotation::Quaternion(pose[3], pose[4], pose[5], pose[6]); } break;
+		case RPY: {KDL::Rotation::RPY(pose[3], pose[4], pose[5]); } break;
+		default:
+			std::cerr << "Parameterisation: " << param << " not recognised"<< std::endl;
+	}
+
+	return res;
 }
