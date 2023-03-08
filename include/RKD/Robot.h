@@ -2,6 +2,7 @@
 #define RKDLIB_M_HEADER_COMMON
 
 #define SIZE_POSE 6
+#define IK_TIMEOUT 0.005
 
 // Eigen
 #include <Eigen/Core>
@@ -53,69 +54,66 @@ enum Parameterisation{
 class Robot{
 
 public:
+	
 	/*! \brief Robot Kinematics and Dynamics constructor
 	 * 
 	 *	Robot dynamics constructor - Empty
 	 */
 	Robot();
+
 	/*! \brief Robot Kinematics and Dynamics Copy-constructor
 	 * 
 	 *	Copy constructor
 	 */
 	Robot(const Robot&);
+
 	/*! \brief Robot Kinematics and Dynamics Constructor
 	 * 
 	 *	Robot dynamic constructor - urdf model, chain-root, and chain-tip
 	 */
 	Robot(const std::string&, const std::string&, const std::string&);
+
 	/*! \brief Robot Kinematics and Dynamics distructor
 	 * 
 	 *	Robot Kinematics and Dynamics discrutuctor
 	 */
 	~Robot();
+
 	/*! \brief Get IK 
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position
 	 */
-	std::vector<double> getIK(std::vector<double> const&, bool const near=true);
+	std::vector<double> getIK(std::vector<double> const&, bool const near=true, Parameterisation const param=RPY);
 
 	/*! \brief Get FK
 	 * 
 	 *	Get Forward Kinematic from a given configuration
 	 */
 	std::vector<double> getFK(std::vector<double> const&);
+
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
 	 */
-	KDL::JntArray getTRAC_IK(const KDL::Frame&, int&, const bool near=false);
-	/*! \brief Get IK fast - EIGEN
-	 * 
-	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
-	 */
-	Eigen::VectorXd getTRAC_IK(const Eigen::Vector3d&, const Eigen::Quaterniond&, int&, const bool near = false);
+	std::vector<double> getTRAC_IK(std::vector<double> const&, int&, bool near=false, Parameterisation const param=RPY);
+
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
 	 */
-	KDL::JntArray getTRAC_IK(const KDL::Frame&, int&, const KDL::JntArray&);
+	std::vector<double> getTRAC_IK(std::vector<double> const&, int&, std::vector<double> const&, Parameterisation const param=RPY);
+
 	/*! \brief Get IK fast - EIGEN
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
 	 */
 	Eigen::VectorXd getTRAC_IK(const Eigen::Vector3d&, const Eigen::Quaterniond&, int&, const Eigen::VectorXd&);
+
 	/*! \brief Get Jacobian of the chain
 	 * 
 	 *	Get Jacobian from a given configuration
 	 */
-	KDL::Jacobian getJacobian(const KDL::JntArray);
-	/*! \brief Get Jacobian of the chain
-	 * 
-	 *	Get Jacobian from a given configuration - Eigen
-	 */
-	Eigen::MatrixXd getJacobian(const Eigen::VectorXd&);
-	std::vector<double> getJacobianSTD(const Eigen::VectorXd&);
-	std::vector<double> getJacobian_std(std::vector<double> const&);
+	std::vector<double> getJacobian(std::vector<double> const&);
 
 	/*! \brief Get Inertia Matrix
 	 * 
