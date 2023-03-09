@@ -141,19 +141,23 @@ std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, b
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
-
+		std::cout << "XXX1" << std::endl;
 		//------------------------------------------------------
 		// Initialise the structure of IK algorithm
 		//------------------------------------------------------
 		KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+		std::cout << "XXX1.2" << std::endl;
 		KDL::ChainIkSolverVel_pinv iksolver(*chainPtr_);
+		std::cout << "XXX1.2" << std::endl;
 		KDL::ChainIkSolverPos_NR_JL idsolver(*chainPtr_, q_min_, q_max_, fksolver, iksolver);
 
+		std::cout << "XXX1.2" << std::endl;
 		//------------------------------------------------------
 		// Define the initial value for the algorithm
 		//------------------------------------------------------
 		KDL::JntArray q_init(chain_len_);
-
+		std::cout << "XXX2" << std::endl;
+		
 		//------------------------------------------------------
 		// Check if we want to look for a new configuration near the previous one
 		//------------------------------------------------------
@@ -168,7 +172,7 @@ std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, b
 		// Call Cartesian to Joint function
 		//------------------------------------------------------
 		KDL::Frame ee_frame = PoseToFrame(end_effector_pose, param);
-
+		std::cout << "XXX3" << std::endl;
 		idsolver.CartToJnt(q_init, ee_frame, q);
 
 		//------------------------------------------------------
@@ -180,6 +184,7 @@ std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, b
 	else{
 		std::cerr<< "Robot class has not initialized yet." << std::endl;
 	}
+	std::cout << "XXX" << std::endl;
 
 	return vectorSerialisation(q);
 }
@@ -337,18 +342,22 @@ std::vector<double> Robot::getGravity(std::vector<double> const& q, std::vector<
 	// Check status of the class
 	//------------------------------------------------------
 	if (f_init_){
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
 		//------------------------------------------------------
 		// Initialise structure
 		//------------------------------------------------------
 		KDL::ChainDynParam DChain(*chainPtr_, KDL::Vector(gravity_vec[0], gravity_vec[1], gravity_vec[2]));
+		
 		//------------------------------------------------------
 		// Call Joint to Gravity vector function
 		//------------------------------------------------------
-		DChain.JntToGravity(vectorDeserialisation(q), G);
+		DChain.JntToGravity(q_kdl, G);
 	}
 	else{
 		std::cerr << "Robot class has not initialized yet." << std::endl;
 	}
+
+	std::cout << "XXX" << std::endl;
 
 	return vectorSerialisation(G);
 }
@@ -406,67 +415,49 @@ bool Robot::removePayload(){
 	return true;
 }
 
-bool Robot::getJntPose(const KDL::JntArray q, std::vector< KDL::Frame > &segFrames){
+bool Robot::getJntsPose(std::vector<double> const& q, std::vector<std::vector<double> > &segFrames){
 
-	//------------------------------------------------------
-	// Initialise IK structures
-	//------------------------------------------------------
-	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
-	KDL::Frame T;
+	std::vector<double> T_res(SIZE_POSE);
 
-	for (uint i = 0; i < chain_len_; ++i){
-		//------------------------------------------------------
-		// Call Joint To Cartesian functino on the i-th joint
-		//------------------------------------------------------
-		fksolver.JntToCart(q, T, i);
+	if(f_init_){
 
 		//------------------------------------------------------
-		// Store the i-th joint's frame
+		// Initialise IK structures
 		//------------------------------------------------------
-		segFrames.push_back(T);
+		KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
+		KDL::Frame T;
+
+		KDL::JntArray q_kdl = vectorDeserialisation(q);
+
+		for (uint i = 0; i < chain_len_; ++i){
+			//------------------------------------------------------
+			// Call Joint To Cartesian functino on the i-th joint
+			//------------------------------------------------------
+			fksolver.JntToCart(q_kdl, T, i);
+
+			//------------------------------------------------------
+			// Convert Frame to Vector
+			//------------------------------------------------------
+
+			T_res[0] = T.p.data[0];
+			T_res[1] = T.p.data[1];
+			T_res[2] = T.p.data[2];
+
+			T.M.GetRPY(T_res[3], T_res[4], T_res[5]);
+
+			//------------------------------------------------------
+			// Store the i-th joint's frame
+			//------------------------------------------------------
+			segFrames.push_back(T_res);
+		}
+	}
+	else{
+		std::cerr << "Robot class has not initialized yet." << std::endl;
+		return false;
 	}
 
 	return true;
 }
-
-bool Robot::getJntPose(const Eigen::VectorXd& q, std::vector< Eigen::VectorXd > &segFrames){
-
-
-	//------------------------------------------------------
-	// Initialise IK structures
-	//------------------------------------------------------
-	KDL::ChainFkSolverPos_recursive fksolver(*chainPtr_);
-	KDL::Frame T;
-
-	KDL::JntArray q_kdl(chain_len_);
-	q_kdl.data = q;
-
-	for (uint i = 0; i < chain_len_; ++i){
-		//------------------------------------------------------
-		// Call Joint To Cartesian functino on the i-th joint
-		//------------------------------------------------------
-		fksolver.JntToCart(q_kdl, T, i);
-
-		//------------------------------------------------------
-		// Convert Frame to Vector
-		//------------------------------------------------------
-		Eigen::VectorXd T_eigen(6);
-
-		T_eigen(0) = T.p.data[0];
-		T_eigen(1) = T.p.data[1];
-		T_eigen(2) = T.p.data[2];
-
-		T.M.GetRPY (T_eigen(3), T_eigen(4), T_eigen(5));
-
-		//------------------------------------------------------
-		// Store the i-th joint's frame
-		//------------------------------------------------------
-		segFrames.push_back(T_eigen);
-	}
-
-	return true;
-}
-
 
 std::vector<double> Robot::getJntPose(std::vector<double> const& q, int idx){
 

@@ -144,19 +144,13 @@ public:
 	 * 
 	 *	Get pose for all Joints in the chain - Eigen
 	 */
-	bool getJntPose(const Eigen::VectorXd&, std::vector< Eigen::VectorXd > &);
+	bool getJntsPose(std::vector<double> const&, std::vector<std::vector<double> > &);
 	
 	/*! \brief Get segment positions
 	 * 
 	 *	Get pose for a single Joint of the chain 
 	 */
 	std::vector<double> getJntPose(std::vector<double> const&, int idx = 0);
-
-	/*! \brief Get segment positions
-	 * 
-	 *	Get pose for all segments in the chain - KDL
-	 */
-	bool getJntPose(const KDL::JntArray, std::vector< KDL::Frame > &);
 	
 	/*! \brief Check if the robot is correctly loaded
 	 * 
