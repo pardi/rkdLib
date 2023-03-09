@@ -1,0 +1,6 @@
+[ ] Move all functions to std
+[ ] Create a single function to check the state of the variables and "liveness" of the robot class
+[ ] Create tests
+[ ] Creare release before breaking changes
+[ ] Checks error returns
+[ ] Implement error detection and retrival
