@@ -25,4 +25,4 @@ RUN apt-get install ros-noetic-trac-ik ros-noetic-nlopt -y
 
 
 FROM ci AS build_tests
-RUN mkdir build && cd build && cmake .. && make && make install
+RUN mkdir build && cd build && cmake .. && make && ctest

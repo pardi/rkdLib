@@ -14,7 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 
 # compile extras options
-add_compile_options(-Wall -Wextra -O3)
+add_compile_options(-Wall -Wextra)
 
 # add the find packages for Eigen in the cmake folder
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
