@@ -1,11 +1,10 @@
 FROM ubuntu:20.04 AS ci_minimal
 ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
-COPY . .
+
 RUN apt-get update 
 RUN apt-get install git cmake gcc g++ libeigen3-dev libtinyxml2-dev curl gnupg2 -y
 RUN apt-get install liburdfdom-dev liburdfdom-headers-dev libconsole-bridge-dev -y
-
 
 FROM ci_minimal AS ci_orocos
 RUN mkdir setup_dep && cd setup_dep && git clone https://github.com/orocos/orocos_kinematics_dynamics.git
@@ -25,4 +24,6 @@ RUN apt-get install ros-noetic-trac-ik ros-noetic-nlopt -y
 
 
 FROM ci AS build_tests
+COPY . .
+RUN git submodule update --init
 RUN mkdir build && cd build && cmake .. && make && ctest
