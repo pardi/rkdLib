@@ -25,4 +25,4 @@ RUN apt-get install ros-noetic-trac-ik ros-noetic-nlopt -y
 
 FROM ci AS build_tests
 RUN git clone --recurse-submodules https://github.com/pardi/rkdLib.git
-RUN mkdir build && cd build && cmake .. && make && ctest
+RUN mkdir -p rkdLib/build && cd rkdLib/build && cmake .. && make && ctest
