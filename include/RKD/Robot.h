@@ -39,14 +39,13 @@
 #include <trac_ik/trac_ik.hpp>
 
 
-
-
 namespace RKD{
 
-enum Parameterisation{
-	RPY = 0,
-	QUATERNION = 1,
-	ZYZ = 2};
+enum class Parameterisation{
+	RPY,
+	QUATERNION,
+	ZYZ,
+    };
 
 	//!  Robot Kinematics and Dynamics Library - standalone
 	/*!
@@ -65,105 +64,150 @@ public:
 	/*! \brief Robot Kinematics and Dynamics Copy-constructor
 	 * 
 	 *	Copy constructor
+	 *	\param Robot object to be copied
+	 *	\return Robot object
 	 */
 	Robot(const Robot&);
 
 	/*! \brief Robot Kinematics and Dynamics Constructor
 	 * 
 	 *	Robot dynamic constructor - urdf model, chain-root, and chain-tip
+	 *	\param urdf model
+	 *	\param chain-root
+     *  \param chain-tip
 	 */
 	Robot(const std::string&, const std::string&, const std::string&);
 
-	/*! \brief Robot Kinematics and Dynamics distructor
+	/*! \brief Robot Kinematics and Dynamics destructor
 	 * 
-	 *	Robot Kinematics and Dynamics discrutuctor
+	 *	Robot Kinematics and Dynamics destructor
 	 */
 	~Robot();
 
-	/*! \brief Get IK 
+	/*! \brief Get IK
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position
+	 *	\param cartesian position
+	 *	\param near - if true, the initial configuration is used as a starting point for the IK solver
+	 *	\param param - parameterisation of the orientation
+	 *	\return joint configuration
 	 */
-	std::vector<double> getIK(std::vector<double> const&, bool const near=true, Parameterisation const param=RPY);
+	std::vector<double> getIK(const std::vector<double>&, bool const near=true, const Parameterisation param=RPY);
 
 	/*! \brief Get FK
 	 * 
 	 *	Get Forward Kinematic from a given configuration
+	 *	\param joint configuration
+	 *	\return cartesian position
+	 *
 	 */
-	std::vector<double> getFK(std::vector<double> const&);
+	std::vector<double> getFK(const std::vector<double>&);
 
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik
+	 *	\param cartesian position
+	 *	\param near - if true, the initial configuration is used as a starting point for the IK solver
+	 *	\param param - parameterisation of the orientation
+	 *	\return joint configuration
 	 */
-	std::vector<double> getTRAC_IK(std::vector<double> const&, int&, bool near=false, Parameterisation const param=RPY);
+	std::vector<double> getTRAC_IK(const std::vector<double>&, int, bool near=false, Parameterisation const param=RPY);
 
 	/*! \brief Get IK fast
 	 * 
 	 *	Get Inverse Kinematic from a given cartesian position using trac-ik, takes the initial configuration as input
+	 *	\param cartesian position
+	 *  \param near - if true, the initial configuration is used as a starting point for the IK solver
+	 *  \param initial configuration
+	 *  \param param - parameterisation of the orientation
+	 *  \return joint configuration
 	 */
-	std::vector<double> getTRAC_IK(std::vector<double> const&, int&, std::vector<double> const&, Parameterisation const param=RPY);
+	std::vector<double> getTRAC_IK(conststd::vector<double>&, int, const std::vector<double>&, Parameterisation const param=RPY);
 	
 	/*! \brief Get Jacobian of the chain
 	 * 
 	 *	Get Jacobian from a given configuration
+	 *	\param joint configuration
+	 *	\return Jacobian
 	 */
-	std::vector<double> getJacobian(std::vector<double> const&);
+	std::vector<double> getJacobian(const std::vector<double>&);
 
 	/*! \brief Get Inertia Matrix
 	 * 
 	 *	Get Inertia matrix from a given configuration
+	 *	\param joint configuration
+	 *	\param gravity vector
+	 *	\return Inertia Matrix
 	 */
-	std::vector<double> getInertia(std::vector<double> const&, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getInertia(const std::vector<double>&, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
 	
 	/*! \brief Get Coriolis Matrix
 	 * 
 	 *	Get Coriolis Matrix given a joint configuration and joint velocities
+	 *	\param joint configuration
+	 *	\param joint velocities
+	 *	\param gravity vector
+	 *	\return Coriolis Matrix
 	 */		
-	std::vector<double> getCoriolis(std::vector<double> const&, std::vector<double> const&, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getCoriolis(const std::vector<double>&, const std::vector<double>&, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
 	
 	/*! \brief Get Gravity vector
 	 * 
 	 *	Get Gravity vector from a given configuration
+	 *	\param joint configuration
+	 *	\param gravity vector
+	 *	\return Gravity vector
 	 */
-	std::vector<double> getGravity(std::vector<double> const& q, std::vector<double> const& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getGravity(const std::vector<double>& q, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
 
 	/*! \brief Load payload
 	 * 
 	 *	Add a payload to the existing robot chain
+	 *	\param tip pose
+	 *	\param payload inertia
+	 *	\return true if successful
 	 */
-	bool addPayload(const KDL::Frame &f_tip=KDL::Frame::Identity(), const KDL::RigidBodyInertia &I=KDL::RigidBodyInertia::Zero());
+	bool addPayload(const KDL::Frame& f_tip=KDL::Frame::Identity(), const KDL::RigidBodyInertia &I=KDL::RigidBodyInertia::Zero());
 	
 	/*! \brief UnLoad payload
 	 * 
 	 *	Remove a payload to the existing robot chain
+	 *	\return true if successful
 	 */
 	bool removePayload();
 	
 	/*! \brief Get segment positions
 	 * 
-	 *	Get pose for all Joints in the chain - Eigen
+	 *	Get pose for all Joints in the chain
+	 *	\param joint configuration
+	 *	\param vector of segment positions
+	 *	\return true if successful
 	 */
-	bool getJntsPose(std::vector<double> const&, std::vector<std::vector<double> > &);
+	bool getJntsPose(const std::vector<double>&, std::vector<std::vector<double> > &);
 	
 	/*! \brief Get segment positions
 	 * 
-	 *	Get pose for a single Joint of the chain 
+	 *	Get pose for a single Joint of the chain
+	 *	\param joint configuration
+	 *	\param index of the joint
+	 *	\return pose of the joint
 	 */
-	std::vector<double> getJntPose(std::vector<double> const&, int idx = 0);
+	std::vector<double> getJntPose(const std::vector<double>&, int idx = 0);
 	
 	/*! \brief Check if the robot is correctly loaded
 	 * 
 	 *	Check if the robot is enabled
+	 *	\return true if the robot is correctly loaded
 	 */	
 	bool good();
 	
 	/*! \brief Get the number of joints of the robot
 	 * 
 	 *	Get the number of joints of the robot
+	 *	\return number of joints
 	 */	
 	
-	uint inline getNrOfJoints() const {
+	std::uint8_t inline getNrOfJoints() const {
 		return chain_.getNrOfJoints();
 	}
 	
@@ -172,48 +216,67 @@ private:
 	/*! \brief Get urdf model from file
 	 * 
 	 *	Read and create a URDF::Model from file
+	 *	\param path to the URDF file
+	 *	\return URDF::Model
 	 */	
 	urdf::ModelInterfaceSharedPtr getURDFModel(const std::string&);
 	
 	/*! \brief Load the Robot from URDF
 	 * 
 	 *	Generate a KDL chain and tree from an URDF file
+	 *	\param URDF::Model
+	 *	\param name of the root link
+	 *	\param name of the tip link
+	 *	\return true if successful
 	 */	
 	bool loadRobot(urdf::ModelInterfaceSharedPtr, const std::string&, const std::string&);
 	
 	/*! \brief Convert a pose into a KDL::Frame
 	 * 
 	 *	Generate a KDL frame given a pose expressed as std::vector<double>
+	 *	\param pose
+	 *	\param param - parameterisation of the orientation
+	 *	\return KDL::Frame
 	 */	
-	KDL::Frame PoseToFrame(std::vector<double> const& pose, Parameterisation const param = RPY);
+	KDL::Frame PoseToFrame(const std::vector<double>& pose, const Parameterisation param = RPY);
 	
 	/*! \brief Convert a Inertia Matrix into a vector<double>
 	 * 
 	 *	Serialise the matrix of inertia into a std::vector<double> by column
+	 *	\param KDL::JntSpaceInertiaMatrix
+	 *	\return std::vector<double>
 	 */	
-	std::vector<double> matrixSerialisation(KDL::JntSpaceInertiaMatrix const&);
+	std::vector<double> matrixSerialisation(const KDL::JntSpaceInertiaMatrix&);
 	
 	/*! \brief Convert a Jacobian Matrix into a vector<double>
 	 * 
 	 *	Serialise the jacobian matrix into a std::vector<double> by column
+	 *	\param KDL::Jacobian
+	 *	\return std::vector<double>
 	 */	
-	std::vector<double> matrixSerialisation(KDL::Jacobian const&);
+	std::vector<double> matrixSerialisation(const KDL::Jacobian&);
 	
 	/*! \brief Convert a JntArray into a vector<double>
 	 * 
 	 *	Serialise the vector of jnt array into a std::vector<double>
+	 *	\param KDL::JntArray
+	 *	\return std::vector<double>
 	 */	
-	std::vector<double> vectorSerialisation(KDL::JntArray const&);
+	std::vector<double> vectorSerialisation(const KDL::JntArray&);
 
 	/*! \brief Convert a vector<double> into JntArray
 	 * 
 	 *	Deserialise the vecot of std::vector<double> into a jnt array
+	 *	\param std::vector<double>
+	 *	\return KDL::JntArray
 	 */	
-	KDL::JntArray vectorDeserialisation(std::vector<double> const&);
+	KDL::JntArray vectorDeserialisation(const std::vector<double>&);
 
 	/*! \brief Pseudo Inverse of a matrix
 	 * 
 	 *	Compute the Pseudo Inverse of a matrix
+	 *	\param Eigen::MatrixXd
+	 *	\param bool - damped or not
 	 */	
 	static Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd M_, const bool& damped)
 	{	
