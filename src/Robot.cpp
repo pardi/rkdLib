@@ -133,7 +133,7 @@ bool Robot::loadRobot(urdf::ModelInterfaceSharedPtr model, const std::string& ch
 	return true;
 }
 
-std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, bool const near, Parameterisation const param){
+std::vector<double> Robot::getIK(const std::vector<double>& end_effector_pose, const bool near, const Parameterisation param){
 
 	KDL::JntArray q(chain_len_);
 	
@@ -190,7 +190,7 @@ std::vector<double> Robot::getIK(std::vector<double> const& end_effector_pose, b
 }
 
 
-std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_pose, int& rc, bool near, Parameterisation const param){
+std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_pose, int rc, bool near, Parameterisation const param){
 		
 	std::vector<double> q_init(chain_len_);
 
@@ -205,7 +205,7 @@ std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_po
 
 }
 
-std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_pose, int& rc, std::vector<double> const& q_init, Parameterisation const param){
+std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_pose, int rc, const std::vector<double>& q_init, Parameterisation const param){
   
 	KDL::JntArray q(chain_len_);
 
@@ -250,7 +250,7 @@ std::vector<double> Robot::getTRAC_IK(std::vector<double> const& end_effector_po
 
 }
 
-std::vector<double> Robot::getJacobian(std::vector<double> const& q){
+std::vector<double> Robot::getJacobian(const std::vector<double>& q){
 
 	KDL::Jacobian J(chain_len_);
 
@@ -278,7 +278,7 @@ std::vector<double> Robot::getJacobian(std::vector<double> const& q){
 	return matrixSerialisation(J);	
 }
 
-std::vector<double> Robot::getInertia(std::vector<double> const& q, std::vector<double> const& gravity_vec){
+std::vector<double> Robot::getInertia(const std::vector<double>& q, const std::vector<double>& gravity_vec){
 
 	KDL::JntSpaceInertiaMatrix M(chain_len_);
 
@@ -305,7 +305,7 @@ std::vector<double> Robot::getInertia(std::vector<double> const& q, std::vector<
 	return matrixSerialisation(M);
 }
 
-std::vector<double> Robot::getCoriolis(std::vector<double> const& q, std::vector<double> const& dq, std::vector<double> const& gravity_vec){
+std::vector<double> Robot::getCoriolis(const std::vector<double>& q, const std::vector<double>& dq, const std::vector<double>& gravity_vec){
 
 	KDL::JntArray C(chain_len_);
 
@@ -334,7 +334,7 @@ std::vector<double> Robot::getCoriolis(std::vector<double> const& q, std::vector
 	return vectorSerialisation(C);
 }
 
-std::vector<double> Robot::getGravity(std::vector<double> const& q, std::vector<double> const& gravity_vec){
+std::vector<double> Robot::getGravity(const std::vector<double>& q, const std::vector<double>& gravity_vec){
 
 	KDL::JntArray G(chain_len_);
 
@@ -415,7 +415,7 @@ bool Robot::removePayload(){
 	return true;
 }
 
-bool Robot::getJntsPose(std::vector<double> const& q, std::vector<std::vector<double> > &segFrames){
+bool Robot::getJntsPose(const std::vector<double>& q, std::vector<std::vector<double> > &segFrames){
 
 	std::vector<double> T_res(SIZE_POSE);
 
@@ -459,7 +459,7 @@ bool Robot::getJntsPose(std::vector<double> const& q, std::vector<std::vector<do
 	return true;
 }
 
-std::vector<double> Robot::getJntPose(std::vector<double> const& q, int idx){
+std::vector<double> Robot::getJntPose(const std::vector<double>& q, int idx){
 
 	std::vector<double> T_out(SIZE_POSE);
 
@@ -495,13 +495,13 @@ bool Robot::good(){
 	return f_init_;
 }
 
-std::vector<double> Robot::getFK(std::vector<double> const& q){
+std::vector<double> Robot::getFK(const std::vector<double>& q){
 
 	return getJntPose(q, chain_len_);
 	
 }
 
-std::vector<double> Robot::vectorSerialisation(KDL::JntArray const& v){
+std::vector<double> Robot::vectorSerialisation(const KDL::JntArray& v){
 
 	std::vector<double> v_res(v.data.size());
 
@@ -512,7 +512,7 @@ std::vector<double> Robot::vectorSerialisation(KDL::JntArray const& v){
 	return v_res;
 }
 
-KDL::JntArray Robot::vectorDeserialisation(std::vector<double> const& v){
+KDL::JntArray Robot::vectorDeserialisation(const std::vector<double>& v){
 
 	KDL::JntArray v_res(v.size());
 	
@@ -523,7 +523,7 @@ KDL::JntArray Robot::vectorDeserialisation(std::vector<double> const& v){
 	return v_res;
 }
 
-std::vector<double> Robot::matrixSerialisation(KDL::JntSpaceInertiaMatrix const& M){
+std::vector<double> Robot::matrixSerialisation(const KDL::JntSpaceInertiaMatrix& M){
 
 	std::vector<double> M_res(chain_len_ * SIZE_POSE);
 
@@ -536,7 +536,7 @@ std::vector<double> Robot::matrixSerialisation(KDL::JntSpaceInertiaMatrix const&
 	return M_res;
 }
 
-std::vector<double> Robot::matrixSerialisation(KDL::Jacobian const& M){
+std::vector<double> Robot::matrixSerialisation(const KDL::Jacobian& M){
 
 	std::vector<double> M_res(chain_len_ * SIZE_POSE);
 
@@ -549,7 +549,7 @@ std::vector<double> Robot::matrixSerialisation(KDL::Jacobian const& M){
 	return M_res;
 }
 
-KDL::Frame Robot::PoseToFrame(std::vector<double> const& pose, Parameterisation const param){
+KDL::Frame Robot::PoseToFrame(const std::vector<double>& pose, const Parameterisation param){
 
 	KDL::Frame res;
 	
