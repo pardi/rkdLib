@@ -1,9 +1,9 @@
 #ifndef RKDLIB_M_HEADER_COMMON
 #define RKDLIB_M_HEADER_COMMON
 
-#define SIZE_POSE 6
-#define IK_TIMEOUT 0.005
-#define STANDARD_GRAVITY_VEC {0.0, 0.0, -9.81}
+constexpr uint8_t kPoseSize = 6
+constexpr double kIkTimeout = 0.005
+constexpr std::vector<double> kStandardGravityVec = {0.0, 0.0, -9.81};
 
 // Eigen
 #include <Eigen/Core>
@@ -139,7 +139,7 @@ public:
 	 *	\param gravity vector
 	 *	\return Inertia Matrix
 	 */
-	std::vector<double> getInertia(const std::vector<double>&, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getInertia(const std::vector<double>&, const std::vector<double>& gravity_vec = kStandardGravityVec);
 	
 	/*! \brief Get Coriolis Matrix
 	 * 
@@ -149,7 +149,7 @@ public:
 	 *	\param gravity vector
 	 *	\return Coriolis Matrix
 	 */		
-	std::vector<double> getCoriolis(const std::vector<double>&, const std::vector<double>&, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getCoriolis(const std::vector<double>&, const std::vector<double>&, const std::vector<double>& gravity_vec = kStandardGravityVec);
 	
 	/*! \brief Get Gravity vector
 	 * 
@@ -158,7 +158,7 @@ public:
 	 *	\param gravity vector
 	 *	\return Gravity vector
 	 */
-	std::vector<double> getGravity(const std::vector<double>& q, const std::vector<double>& gravity_vec = STANDARD_GRAVITY_VEC);
+	std::vector<double> getGravity(const std::vector<double>& q, const std::vector<double>& gravity_vec = kStandardGravityVec);
 
 	/*! \brief Load payload
 	 * 
@@ -279,7 +279,8 @@ private:
 	 *	\param bool - damped or not
 	 */	
 	static Eigen::MatrixXd pseudoInverse(const Eigen::MatrixXd M_, const bool& damped)
-	{	
+	{
+
 		double lambda_ = damped?0.1:0.0;
 
 		Eigen::JacobiSVD<Eigen::MatrixXd> svd(M_, Eigen::ComputeFullU | Eigen::ComputeFullV);
@@ -296,7 +297,7 @@ private:
 	KDL::Chain chain_;
 	KDL::Chain chainPL_;
 	KDL::Chain* chainPtr_;
-	uint chain_len_;
+	uint8_t chain_len_;
 	KDL::JntArray q_min_;
 	KDL::JntArray q_max_;
 	KDL::JntArray last_q_;
