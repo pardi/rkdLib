@@ -206,11 +206,10 @@ std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_po
 }
 
 std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_pose, int rc, const std::vector<double>& q_init, Parameterisation const param){
-  
+
 	KDL::JntArray q(chain_len_);
 
     double elapsed = 0.0;
-    const double timeout = IK_TIMEOUT;
 	boost::posix_time::ptime start_time;
 	boost::posix_time::time_duration diff;
 
@@ -219,7 +218,7 @@ std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_po
 	//------------------------------------------------------
 	if (f_init_){
 
-		
+
 		KDL::JntArray q_initKDL(chain_len_);
 		KDL::Frame ee_frame = PoseToFrame(end_effector_pose, param);
 
@@ -235,8 +234,8 @@ std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_po
 			diff = boost::posix_time::microsec_clock::local_time() - start_time;
 	      	elapsed = diff.total_nanoseconds() / 1e9;
 
-	    }while (rc < 0 && elapsed < timeout);
-		
+	    }while (rc < 0 && elapsed < kIkTimeout);
+
 		//------------------------------------------------------
 		// Store next configuration
 		//------------------------------------------------------
@@ -245,7 +244,7 @@ std::vector<double> Robot::getTRAC_IK(const std::vector<double>& end_effector_po
 	}else{
 		std::cout << "Robot not initialised!" << std::endl;
 	}
-		
+
     return vectorSerialisation(q);
 
 }
@@ -397,7 +396,7 @@ bool Robot::addPayload(const KDL::Frame &f_tip, const KDL::RigidBodyInertia &I){
 	//------------------------------------------------------
 
 	chainPtr_ = &chainPL_;
-	
+
 	return true;
 }
 
