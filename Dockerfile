@@ -18,6 +18,6 @@ RUN mkdir -p setup_dep/trac_ik_lib_standalone/build && cd setup_dep/trac_ik_lib_
 
 COPY . /app
 
-FROM ci AS build_tests
+FROM ci_minimal AS build_tests
 RUN git clone --recurse-submodules https://github.com/pardi/rkdLib.git
 RUN mkdir -p rkdLib/build && cd rkdLib/build && cmake .. && make && ctest
