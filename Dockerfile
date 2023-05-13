@@ -12,7 +12,7 @@ RUN cd setup_dep/orocos_kinematics_dynamics/orocos_kdl/build && cmake .. && make
 RUN cd setup_dep/ && git clone https://github.com/pardi/kdl_parser.git
 RUN mkdir -p setup_dep/kdl_parser/kdl_parser/build && cd setup_dep/kdl_parser/kdl_parser/build && cmake .. && make && make install
 
-RUN mkdir setup_dep && cd setup_dep/ && git clone https://github.com/pardi/trac_ik_lib_standalone.git
+RUN cd setup_dep/ && git clone https://github.com/pardi/trac_ik_lib_standalone.git
 RUN mkdir -p setup_dep/trac_ik_lib_standalone/build && cd setup_dep/trac_ik_lib_standalone/build && cmake .. && make && make install
 
 
