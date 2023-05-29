@@ -17,11 +17,7 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 
 #include <RKD/Robot.h>
 
-using namespace RKD;
-
-Robot::Robot(){}
-
-Robot::~Robot(){}
+using namespace rkd;
 
 Robot::Robot(const Robot& robot){
 
