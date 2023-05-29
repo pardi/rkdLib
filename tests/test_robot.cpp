@@ -4,7 +4,7 @@
 // Demonstrate some basic assertions.
 TEST(RobotTest, ClassInitialisation) {
   
-  RKD::Robot panda_robot;
+  rkd::Robot panda_robot;
 
   EXPECT_FALSE(panda_robot.good());
 
@@ -12,18 +12,16 @@ TEST(RobotTest, ClassInitialisation) {
 
 TEST(RobotTest, ReturnNumberofJoints) {
   
- 	RKD::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
+ 	rkd::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
 
   EXPECT_EQ(panda_robot.getNrOfJoints(), 7);
 
 }
 
 
-
-
 TEST(RobotTest, ReturnFK) {
   
- 	RKD::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
+ 	rkd::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
 
 	std::vector<double> q{0, 0, 0, 0, 0, 0, 0};
   Eigen::Matrix<double, 6, 1> p_res;
@@ -41,7 +39,7 @@ TEST(RobotTest, ReturnFK) {
 
 TEST(RobotTest, ReturnJntPose) {
   
- 	RKD::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
+ 	rkd::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
 
 	std::vector<double> q{0, 0, 0, 0, 0, 0, 0};
   Eigen::Matrix<double, 6, 1> p_res;
@@ -61,7 +59,7 @@ TEST(RobotTest, ReturnJntPose) {
 
 TEST(RobotTest, ReturnCoriolis) {
   
- 	RKD::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
+ 	rkd::Robot panda_robot("../urdf/panda.urdf", "panda_link0", "panda_hand");
 
 	std::vector<double> q{0, 0, 0, 0, 0, 0, 0};
   std::vector<double> dq{0, 0, 0, 0, 0, 0, 0};
