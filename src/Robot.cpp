@@ -84,7 +84,7 @@ Robot::Robot(const std::string& urdf_path, const std::string& chain_root, const 
 			//------------------------------------------------------
 			// Initialise TRAC-IK
 			//------------------------------------------------------
-	 		tracik_solver_.reset(new TRAC_IK::TRAC_IK(chain_, q_min_, q_max_));
+	 		tracik_solver_.reset(new trac_ik::TRAC_IK(chain_, q_min_, q_max_));
 			if (!tracik_solver_->getKDLChain(chain_)){
 				std::cout << "TRAC_IK ERROR" << std::endl;
 				f_init_ = false;
@@ -433,7 +433,7 @@ bool Robot::removePayload(){
 
 bool Robot::getJntsPose(const std::vector<double>& q, std::vector<std::vector<double> > &segFrames){
 
-	std::vector<double> T_res(SIZE_POSE);
+	std::vector<double> T_res(kPoseSize);
 
 	if(f_init_){
 
@@ -477,7 +477,7 @@ bool Robot::getJntsPose(const std::vector<double>& q, std::vector<std::vector<do
 
 std::vector<double> Robot::getJntPose(const std::vector<double>& q, int idx){
 
-	std::vector<double> T_out(SIZE_POSE);
+	std::vector<double> T_out(kPoseSize);
 
 	if(f_init_){
 
@@ -541,7 +541,7 @@ KDL::JntArray Robot::vectorDeserialisation(const std::vector<double>& v){
 
 std::vector<double> Robot::matrixSerialisation(const KDL::JntSpaceInertiaMatrix& M){
 
-	std::vector<double> M_res(chain_len_ * SIZE_POSE);
+	std::vector<double> M_res(chain_len_ * kPoseSize);
 
 	for (uint i = 0; i < M.data.cols() ; ++i){
 		for (uint j = 0; j < M.data.rows(); ++j){
@@ -554,7 +554,7 @@ std::vector<double> Robot::matrixSerialisation(const KDL::JntSpaceInertiaMatrix&
 
 std::vector<double> Robot::matrixSerialisation(const KDL::Jacobian& M){
 
-	std::vector<double> M_res(chain_len_ * SIZE_POSE);
+	std::vector<double> M_res(chain_len_ * kPoseSize);
 
 	for (uint i = 0; i < M.data.cols() ; ++i){
 		for (uint j = 0; j < M.data.rows(); ++j){
@@ -575,10 +575,10 @@ KDL::Frame Robot::PoseToFrame(const std::vector<double>& pose, const Parameteris
 	res.p[2] = pose[2];
 
 	switch(param){
-		case QUATERNION: {KDL::Rotation::Quaternion(pose[3], pose[4], pose[5], pose[6]); } break;
-		case RPY: {KDL::Rotation::RPY(pose[3], pose[4], pose[5]); } break;
+		case Parameterisation::QUATERNION: {KDL::Rotation::Quaternion(pose[3], pose[4], pose[5], pose[6]); } break;
+		case Parameterisation::RPY: {KDL::Rotation::RPY(pose[3], pose[4], pose[5]); } break;
 		default:
-			std::cerr << "Parameterisation: " << param << " not recognised"<< std::endl;
+			std::cerr << "Parameterisation: " << static_cast<int>(param) << " not recognised"<< std::endl;
 	}
 
 	return res;
