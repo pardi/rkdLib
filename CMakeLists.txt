@@ -6,7 +6,7 @@ project(robotRKDLib
     LANGUAGES CXX)
 
 # # specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -14,7 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 
 # compile extras options
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -fPIC)
 
 # add the find packages for Eigen in the cmake folder
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
@@ -22,6 +22,8 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 # find packages
 find_package(Boost REQUIRED COMPONENTS date_time filesystem iostreams)
 find_package(Eigen3 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(pkg_nlopt REQUIRED nlopt)
 
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
@@ -36,20 +38,25 @@ set(EXECUTABLE_FILES
 set(LIB_NAME RKD_R)
 
 # add Libraries
-add_library(${LIB_NAME} SHARED src/Robot.cpp)
-
-set(DEPENDENCY_DIR
-/opt/ros/noetic/include/ 
-/opt/ros/noetic/include/nlopt/)
-
-set(DEPENDENCY_LIB
-/opt/ros/noetic/lib/)
+add_library(${LIB_NAME} ${EXECUTABLE_FILES})
 
 # Include Dirs
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${DEPENDENCY_DIR})
+target_include_directories(${LIB_NAME} PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+   ${Boost_INCLUDE_DIRS} 
+   ${Eigen_INCLUDE_DIRS}
+   ${pkg_nlopt_INCLUDE_DIRS})
 
 # Target link libraries
-target_link_libraries(${LIB_NAME} PRIVATE -L${DEPENDENCY_LIB} ${Boost_LIBRARIES} urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik pthread)
+target_link_libraries(${LIB_NAME} PUBLIC 
+    ${Boost_LIBRARIES}
+    urdfdom_model 
+    orocos-kdl 
+    Eigen3::Eigen3 
+    kdl_parser 
+    trac_ik 
+    pthread
+	${pkg_nlopt_LIBRARIES})
 
 # Headers
 set(HEADERS_RKD
