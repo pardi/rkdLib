@@ -18,10 +18,6 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 #ifndef RKDLIB_M_HEADER_COMMON
 #define RKDLIB_M_HEADER_COMMON
 
-constexpr uint8_t kPoseSize = 6
-constexpr double kIkTimeout = 0.005
-constexpr std::vector<double> kStandardGravityVec = {0.0, 0.0, -9.81};
-
 // Eigen
 #include <Eigen/Core>
 #include <Eigen/LU>
@@ -55,6 +51,10 @@ constexpr std::vector<double> kStandardGravityVec = {0.0, 0.0, -9.81};
 // TRAC-IK Libs
 #include <trac_ik/trac_ik.hpp>
 
+
+constexpr size_t kPoseSize = 6;
+constexpr double kIkTimeout = 0.005;
+const std::vector<double> kStandardGravityVec = {0.0, 0.0, -9.81};
 
 namespace RKD{
 
@@ -109,7 +109,7 @@ public:
 	 *	\param param - parameterisation of the orientation
 	 *	\return joint configuration
 	 */
-	std::vector<double> getIK(const std::vector<double>&, bool const near=true, const Parameterisation param=RPY);
+	std::vector<double> getIK(const std::vector<double>&, bool const near=true, const Parameterisation param=Parameterisation::RPY);
 
 	/*! \brief Get FK
 	 * 
@@ -128,7 +128,7 @@ public:
 	 *	\param param - parameterisation of the orientation
 	 *	\return joint configuration
 	 */
-	std::vector<double> getTRAC_IK(const std::vector<double>&, int, bool near=false, Parameterisation const param=RPY);
+	std::vector<double> getTRAC_IK(const std::vector<double>&, int, bool near=false, Parameterisation const param=Parameterisation::RPY);
 
 	/*! \brief Get IK fast
 	 * 
@@ -139,7 +139,7 @@ public:
 	 *  \param param - parameterisation of the orientation
 	 *  \return joint configuration
 	 */
-	std::vector<double> getTRAC_IK(conststd::vector<double>&, int, const std::vector<double>&, Parameterisation const param=RPY);
+	std::vector<double> getTRAC_IK(const std::vector<double>&, int, const std::vector<double>&, Parameterisation const param=Parameterisation::RPY);
 	
 	/*! \brief Get Jacobian of the chain
 	 * 
@@ -255,7 +255,7 @@ private:
 	 *	\param param - parameterisation of the orientation
 	 *	\return KDL::Frame
 	 */	
-	KDL::Frame PoseToFrame(const std::vector<double>& pose, const Parameterisation param = RPY);
+	KDL::Frame PoseToFrame(const std::vector<double>& pose, const Parameterisation param = Parameterisation::RPY);
 	
 	/*! \brief Convert a Inertia Matrix into a vector<double>
 	 * 
@@ -322,7 +322,7 @@ private:
 	std::vector<std::string> joint_handles_;
 	bool f_init_{false};
 	bool f_chainPL_{false};
-	std::unique_ptr<TRAC_IK::TRAC_IK> tracik_solver_;
+	std::unique_ptr<trac_ik::TRAC_IK> tracik_solver_;
 
 };
 }
