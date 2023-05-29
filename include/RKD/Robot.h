@@ -56,7 +56,7 @@ constexpr size_t kPoseSize = 6;
 constexpr double kIkTimeout = 0.005;
 const std::vector<double> kStandardGravityVec = {0.0, 0.0, -9.81};
 
-namespace RKD{
+namespace rkd{
 
 enum class Parameterisation{
 	RPY,
@@ -76,7 +76,7 @@ public:
 	 * 
 	 *	Robot dynamics constructor - Empty
 	 */
-	Robot();
+	Robot() = default;
 
 	/*! \brief Robot Kinematics and Dynamics Copy-constructor
 	 * 
@@ -99,7 +99,7 @@ public:
 	 * 
 	 *	Robot Kinematics and Dynamics destructor
 	 */
-	~Robot();
+	~Robot() = default;
 
 	/*! \brief Get IK
 	 * 
