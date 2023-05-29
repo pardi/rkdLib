@@ -8,11 +8,16 @@ RKDLib is a wrapper of the KDL library from Orocos, which uses Eigen and simplif
 This package requires the installation of the following packages. To avoid issue with the lib versioning, please follow 
 the order.
 
-- cmake >= 3.4
-- [kdl-orocos](https://www.orocos.org/kdl)
-- [urdfdom](https://github.com/ros/urdfdom)
-- [kdl_parser](https://github.com/ros/kdl_parser/tree/melodic-devel)
-- [trac-ik](https://bitbucket.org/traclabs/trac_ik/src/master/trac_ik_lib/)
+```
+sudo apt update
+sudo apt install -y cmake gcc g++ libeigen3-dev libtinyxml2-dev curl \
+                    gnupg2 liburdfdom-dev liburdfdom-headers-dev \
+                    libconsole-bridge-dev libboost-all-dev libnlopt-dev libnlopt-cxx-dev
+```
+
+- [kdl-orocos](https://github.com/orocos/orocos_kinematics_dynamics.git)
+- [kdl_parser](https://github.com/pardi/kdl_parser.git)
+- [trac-ik-lib-standalone](https://github.com/pardi/trac_ik_lib_standalone.git)
 
 ## Installation
 Clone the project repo:
