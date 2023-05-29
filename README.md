@@ -45,7 +45,7 @@ Here, you can find a snippet of code for runninig your first example!
 ```C
 #include <RKD/Robot.h>
 
-using namespace RKD;
+using namespace rkd;
 
 Robot myRobot;
 
