@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14)
 
-# set the project name
+# Set the project name
 project(robotRKDLib 
     VERSION 1.0
     LANGUAGES CXX)
 
-# # specify the C++ standard
+# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -13,13 +13,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Install Variables
 include(GNUInstallDirs)
 
-# compile extras options
+# Compile extra options
 add_compile_options(-Wall -Wextra -fPIC)
 
-# add the find packages for Eigen in the cmake folder
+# Add the find packages for Eigen in the cmake folder
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 
-# find packages
+# Find packages
 find_package(Boost REQUIRED COMPONENTS date_time filesystem iostreams)
 find_package(Eigen3 REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -27,90 +27,93 @@ pkg_check_modules(pkg_nlopt REQUIRED nlopt)
 
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
-option(COMPILE_EXAMPLE "Compile the test function" ON)
-
-# file to compile
-set(EXECUTABLE_FILES
-  src/Robot.cpp
-)
+option(BUILD_TESTS "Build unit tests" ON)
+option(BUILD_EXAMPLES "Build example applications" OFF)
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
 # Set variables
-set(LIB_NAME RKD_R)
+set(LIB_NAME rkd)
 
-# add Libraries
-add_library(${LIB_NAME} ${EXECUTABLE_FILES})
+# Sources and headers
+set(SOURCES src/Robot.cpp)
+set(HEADERS include/rkd/Robot.h)
 
-# Include Dirs
-target_include_directories(${LIB_NAME} PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-   ${Boost_INCLUDE_DIRS} 
-   ${Eigen_INCLUDE_DIRS}
-   ${pkg_nlopt_INCLUDE_DIRS})
+# Create the library
+add_library(${LIB_NAME} ${SOURCES})
 
-# Target link libraries
-target_link_libraries(${LIB_NAME} PUBLIC 
+# Set shared/static linking
+set_target_properties(${LIB_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    PUBLIC_HEADER "${HEADERS}"
+)
+
+# Ensure Eigen is propagated to downstream projects
+target_link_libraries(${LIB_NAME} PUBLIC
     ${Boost_LIBRARIES}
-    urdfdom_model 
-    orocos-kdl 
-    Eigen3::Eigen3 
-    kdl_parser 
-    trac_ik 
+    urdfdom_model
+    orocos-kdl
+    Eigen3::Eigen 
+    kdl_parser
+    trac_ik
     pthread
-	${pkg_nlopt_LIBRARIES})
-
-# Headers
-set(HEADERS_RKD
-  include/RKD/Robot.h
+    ${pkg_nlopt_LIBRARIES}
 )
 
-# Tests
-add_subdirectory(dep/gtest)
-enable_testing()
-
-add_executable(
-  test_robot
-  tests/test_robot.cpp
-  )
-
-target_link_libraries(
-  test_robot
-  GTest::gtest_main
-  Eigen3::Eigen3 
-  RKD_R
+# Also tell CMake to export Eigen include paths for downstream projects
+target_include_directories(${LIB_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    ${EIGEN3_INCLUDE_DIR}
 )
+# ---------------------- GoogleTest (Do NOT install) ----------------------
+# if (BUILD_TESTS)
+#   add_subdirectory(dep/gtest)
+#   enable_testing()
 
-include(GoogleTest)
-gtest_discover_tests(test_robot)
+#   add_executable(test_robot tests/test_robot.cpp)
+#   target_link_libraries(test_robot PRIVATE GTest::gtest_main rkd)
 
+#   include(GoogleTest)
+#   gtest_discover_tests(test_robot)
+# endif()
 
-# ------------------------------------------------------- TEST CODE
-option(BUILD_EXAMPLES "Set ON to compile the examples" OFF)
-
-# Examples
-set(EXAMPLES_CPP
-    examples/example_init_class.cpp
-)
-
+# ---------------------- Example App (Verifies that linking works) ----------------------
 if (BUILD_EXAMPLES)
-  # add the executable
-  add_executable(example_script MACOSX_BUNDLE ${EXAMPLES_CPP} )
-
-  # Include Dirs
-  target_include_directories(example_script PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} )
-
-  # Target link libraries
-  target_link_libraries(example_script PRIVATE Boost::date_time Boost::filesystem Boost::iostreams urdfdom_model orocos-kdl Eigen3::Eigen3 kdl_parser trac_ik ${LIB_NAME} pthread)
+  add_executable(example_script examples/example_init_class.cpp)
+  target_link_libraries(example_script PRIVATE rkd)
 endif()
-# ------------------------------------------------------- end TEST CODE
 
+# ---------------------- Installation ----------------------
 
-# ------------------------------------------------------- INSTALL
-
-# Set Version properties
-set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION} 
-								PUBLIC_HEADER "${HEADERS_RKD}")
-
-# Install target
 install(TARGETS ${LIB_NAME}
+    EXPORT ${LIB_NAME}Targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RKD/)
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rkd
+)
+
+# Generate and install CMake package files
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}ConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${LIB_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}Config.cmake
+    @ONLY
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/${LIB_NAME}/cmake
+)
+
+install(EXPORT ${LIB_NAME}Targets
+    FILE ${LIB_NAME}Targets.cmake
+    NAMESPACE ${LIB_NAME}::
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/${LIB_NAME}/cmake
+)

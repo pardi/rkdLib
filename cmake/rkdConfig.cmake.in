@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/rkdTargets.cmake")
+
+
+find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS date_time filesystem iostreams)
+
+set(rkd_INCLUDE "@CMAKE_INSTALL_INCLUDEDIR@")
+set(rkd_LIBRARIES rkd::rkd)
+
+mark_as_advanced(robotRDKLib_INCLUDE_DIRS rkd_LIBRARIES)
+
