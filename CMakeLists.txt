@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set the project name
-project(robotRKDLib 
+project(rkd 
     VERSION 1.0
     LANGUAGES CXX)
 
@@ -67,16 +67,18 @@ target_include_directories(${LIB_NAME} PUBLIC
     ${EIGEN3_INCLUDE_DIR}
 )
 # ---------------------- GoogleTest (Do NOT install) ----------------------
-# if (BUILD_TESTS)
-#   add_subdirectory(dep/gtest)
-#   enable_testing()
+if (BUILD_TESTS)
+  add_subdirectory(dep/gtest EXCLUDE_FROM_ALL)
+  enable_testing()
 
-#   add_executable(test_robot tests/test_robot.cpp)
-#   target_link_libraries(test_robot PRIVATE GTest::gtest_main rkd)
+  add_executable(test_robot tests/test_robot.cpp)
+  target_link_libraries(test_robot PRIVATE GTest::gtest_main rkd)
 
-#   include(GoogleTest)
-#   gtest_discover_tests(test_robot)
-# endif()
+  include(GoogleTest)
+  gtest_discover_tests(test_robot)
+
+  set_target_properties(test_robot PROPERTIES EXCLUDE_FROM_ALL TRUE EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+endif()
 
 # ---------------------- Example App (Verifies that linking works) ----------------------
 if (BUILD_EXAMPLES)
